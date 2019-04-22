@@ -14,6 +14,6 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="imageLabeling"
-        android:text="@string/text_recognization" />
+        android:onClick="textDetect"
+        android:text="@string/text_detection" />
 </LinearLayout>

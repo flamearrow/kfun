@@ -14,4 +14,8 @@ class EntryActivity : AppCompatActivity() {
     fun imageLabeling(view: View) {
         startActivity(Intent(applicationContext, ImageLabelingActivity::class.java))
     }
+
+    fun textDetect(view: View) {
+        startActivity(Intent(applicationContext, TextDetectionActivity::class.java))
+    }
 }

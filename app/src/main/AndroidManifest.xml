@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="band.mlgb.kfun">
+    package="band.mlgb.kfun">
 
     <application
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_launcher_round"
-            android:supportsRtl="true"
-            android:theme="@style/AppTheme">
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
 
         <activity android:name=".EntryActivity">
             <intent-filter>
@@ -17,8 +17,8 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".ImageLabelingActivity"
-                android:label="@string/image_labeling">
+            android:name=".ImageLabelingActivity"
+            android:label="@string/image_labeling">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -26,15 +26,33 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                        android:scheme="http"
-                        android:host="www.mlgb.band"
-                        android:pathPrefix="/image_labeling" />
+                    android:host="www.mlgb.band"
+                    android:pathPrefix="/image_labeling"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TextDetectionActivity"
+            android:label="@string/text_detection">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.mlgb.band"
+                    android:pathPrefix="/text_detection"
+                    android:scheme="http" />
             </intent-filter>
         </activity>
 
+        <!--automatically download new models on device, if app is posted to app store, the model will be predownloaded when it's installed-->
+        <!--label: image labeling-->
+        <!--ocr: text detection-->
         <meta-data
-                android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-                android:value="label" />
+            android:name="com.google.firebase.ml.vision.DEPENDENCIES"
+            android:value="label,ocr" />
 
     </application>
 

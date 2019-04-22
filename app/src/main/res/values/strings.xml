@@ -7,7 +7,7 @@
     <string name="gallery">Gallery</string>
     <string name="sup">sup</string>
     <string name="image_labeling">Image Labeling</string>
-    <string name="text_recognization">Text Recog</string>
+    <string name="text_detection">Text Detection</string>
     <string name="kfun_deeplink">Kfun Deeplink
     </string>
 </resources>
