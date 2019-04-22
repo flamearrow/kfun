@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "189699799476",
+    "firebase_url": "https://kfun-e4633.firebaseio.com",
+    "project_id": "kfun-e4633",
+    "storage_bucket": "kfun-e4633.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189699799476:android:b9e1ff4cb7742f46",
+        "android_client_info": {
+          "package_name": "band.mlgb.kfun"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "189699799476-3tdo37ai4f3e993k6te9p9oqc0jmqg0f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLPq1aU78g8O0H_6BIgRGfb4ENQDivP6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "189699799476-3tdo37ai4f3e993k6te9p9oqc0jmqg0f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189699799476:android:fa77f222b328697c",
+        "android_client_info": {
+          "package_name": "com.ml.gb.kfun"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "189699799476-3tdo37ai4f3e993k6te9p9oqc0jmqg0f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLPq1aU78g8O0H_6BIgRGfb4ENQDivP6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "189699799476-3tdo37ai4f3e993k6te9p9oqc0jmqg0f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
