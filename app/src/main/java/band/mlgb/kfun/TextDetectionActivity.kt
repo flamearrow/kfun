@@ -4,21 +4,24 @@ import android.graphics.Bitmap
 import android.widget.Toast
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
+import com.google.firebase.ml.vision.text.FirebaseVisionCloudTextRecognizerOptions
+import java.util.*
 
 // OCR
 class TextDetectionActivity : PickImageActivity() {
     override fun handleImage(bitmap: Bitmap) {
+        toggleLoading(true)
         val image = FirebaseVisionImage.fromBitmap(bitmap)
-
 //        val detector = FirebaseVision.getInstance().cloudTextRecognizer
-        val detector = FirebaseVision.getInstance().onDeviceTextRecognizer
+//        val detector = FirebaseVision.getInstance().onDeviceTextRecognizer
         // supported languages: https://cloud.google.com/vision/docs/languages
-//        val detector = FirebaseVision.getInstance().getCloudTextRecognizer(
-//            FirebaseVisionCloudTextRecognizerOptions.Builder().setLanguageHints(Arrays.asList("en", "cn")).build()
-//        )
+        val detector = FirebaseVision.getInstance().getCloudTextRecognizer(
+            FirebaseVisionCloudTextRecognizerOptions.Builder().setLanguageHints(Arrays.asList("en", "cn")).build()
+        )
         detector.processImage(image).addOnSuccessListener {
             // of Type FireBaseVisionText
                 firebaseVisionText ->
+            toggleLoading(false)
             val blocks = firebaseVisionText.textBlocks
             // only take the first result
             if (blocks.isNotEmpty()) {
@@ -45,6 +48,11 @@ class TextDetectionActivity : PickImageActivity() {
                         }
                     }
                     sb.appendln("---------")
+                }
+                if (sb.isNotEmpty()) {
+                    postResult(sb.toString())
+                } else {
+                    Toast.makeText(applicationContext, "nothing detected", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(applicationContext, "nothing detected", Toast.LENGTH_SHORT).show()

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Will be saved to sdcard/Android/data/band.mlgb.kfun/files/Pictures dir-->
+    <external-path name="my_images" path="Android/data/band.mlgb.kfun/files/Pictures" />
+</paths>

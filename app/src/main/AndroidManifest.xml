@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="band.mlgb.kfun">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!--take higher resolution pic-->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
+
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -54,7 +60,20 @@
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
             android:value="label,ocr" />
 
+
+        <!--
+        file provider for saving pictures taken
+        exported false makes it private
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="band.mlgb.kfun.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
-    <uses-permission android:name="android.permission.CAMERA" />
 </manifest>
