@@ -22,4 +22,12 @@ class EntryActivity : AppCompatActivity() {
     fun faceDetect(view: View) {
         startActivity(Intent(applicationContext, FaceDetectActivity::class.java))
     }
+
+    fun barcodeDetect(view: View) {
+        startActivity(Intent(applicationContext, BarcodeDetectorActivity::class.java))
+    }
+
+    fun landmarkDetect(view: View) {
+        startActivity(Intent(applicationContext, LandmarkDetectorActivity::class.java))
+    }
 }

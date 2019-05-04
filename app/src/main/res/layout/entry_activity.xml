@@ -22,4 +22,16 @@
         android:layout_height="wrap_content"
         android:onClick="faceDetect"
         android:text="@string/face_detection" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="barcodeDetect"
+        android:text="@string/barcode_detection" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="landmarkDetect"
+        android:text="@string/landmark_detection" />
 </LinearLayout>

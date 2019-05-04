@@ -67,13 +67,43 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".BarcodeDetectorActivity"
+            android:label="@string/face_detection">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.mlgb.band"
+                    android:pathPrefix="/text_detection"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".LandmarkDetectorActivity"
+            android:label="@string/face_detection">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.mlgb.band"
+                    android:pathPrefix="/text_detection"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
 
         <!--automatically download new models on device, if app is posted to app store, the model will be predownloaded when it's installed-->
         <!--label: image labeling-->
         <!--ocr: text detection-->
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-            android:value="label,ocr,face" />
+            android:value="label,ocr,face,barcode" />
 
 
         <!--
