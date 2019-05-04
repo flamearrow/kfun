@@ -18,4 +18,8 @@ class EntryActivity : AppCompatActivity() {
     fun textDetect(view: View) {
         startActivity(Intent(applicationContext, TextDetectionActivity::class.java))
     }
+
+    fun faceDetect(view: View) {
+        startActivity(Intent(applicationContext, FaceDetectActivity::class.java))
+    }
 }
