@@ -175,6 +175,14 @@ abstract class PickImageActivity : AppCompatActivity() {
 
     protected fun toggleLoading(isLoading: Boolean) {
         // ternary operator in python style
-        result_view.text = if (isLoading) "loading..." else ""
+//        result_view.text = if (isLoading) "loading..." else ""
+        if (isLoading) {
+            result_view.visibility = View.GONE
+            progress_circular.visibility = View.VISIBLE
+        } else {
+            result_view.text = ""
+            result_view.visibility = View.VISIBLE
+            progress_circular.visibility = View.GONE
+        }
     }
 }

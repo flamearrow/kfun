@@ -59,6 +59,7 @@ class TextDetectionActivity : PickImageActivity() {
 
             }
         }.addOnFailureListener { result ->
+            toggleLoading(false)
             Toast.makeText(applicationContext, result.localizedMessage, Toast.LENGTH_SHORT).show()
         }
     }

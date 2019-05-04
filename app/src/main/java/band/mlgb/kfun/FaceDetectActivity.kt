@@ -79,6 +79,7 @@ class FaceDetectActivity : PickImageActivity() {
             toggleLoading(false)
             postResult(sb.toString())
         }?.addOnFailureListener { result ->
+            toggleLoading(false)
             Toast.makeText(applicationContext, result.localizedMessage, Toast.LENGTH_SHORT).show()
         }
     }
