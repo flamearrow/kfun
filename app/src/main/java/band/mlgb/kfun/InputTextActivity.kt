@@ -28,6 +28,7 @@ abstract class InputTextActivity : KFunBaseActivity() {
     fun fire(view: View) {
         result.text = ""
         handleText(input.text?.toString()!!)
+        input.text.clear()
     }
 
     abstract fun handleText(input: String)

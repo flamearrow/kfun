@@ -20,11 +20,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    aaptOptions {
+        noCompress "tflite"
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0-alpha04'
     implementation 'androidx.core:core-ktx:1.1.0-alpha05'
     implementation 'com.google.android.material:material:1.1.0-alpha06'
@@ -43,6 +46,7 @@ dependencies {
     // nlp models
     implementation 'com.google.firebase:firebase-ml-natural-language:18.2.0'
     implementation 'com.google.firebase:firebase-ml-natural-language-language-id-model:18.0.3'
+    implementation 'com.google.firebase:firebase-ml-natural-language-smart-reply-model:18.0.0'
 
 
 }
