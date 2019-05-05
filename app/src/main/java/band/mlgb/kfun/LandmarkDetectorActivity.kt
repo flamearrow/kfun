@@ -3,23 +3,18 @@ package band.mlgb.kfun
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Toast
-import com.google.firebase.ml.vision.FirebaseVision
-import com.google.firebase.ml.vision.cloud.FirebaseVisionCloudDetectorOptions
+import band.mlgb.kfun.inject.DaggerFirebaseComponent
 import com.google.firebase.ml.vision.cloud.landmark.FirebaseVisionCloudLandmarkDetector
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
+import javax.inject.Inject
 
 class LandmarkDetectorActivity : PickImageActivity() {
-    private lateinit var landmarkDetector: FirebaseVisionCloudLandmarkDetector
+    @Inject
+    lateinit var landmarkDetector: FirebaseVisionCloudLandmarkDetector
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseVisionCloudDetectorOptions.Builder()
-            .setModelType(FirebaseVisionCloudDetectorOptions.LATEST_MODEL)
-            .setMaxResults(15)
-            .build().let {
-                landmarkDetector = FirebaseVision.getInstance().getVisionCloudLandmarkDetector(it)
-            }
-
+        DaggerFirebaseComponent.create().inject(this)
     }
 
     override fun handleImage(bitmap: Bitmap) {
@@ -39,7 +34,8 @@ class LandmarkDetectorActivity : PickImageActivity() {
                     val bounds = landmark.boundingBox
                     val landmarkName = landmark.landmark
                     sb.appendln(
-                        "${landmark.landmark} with entityId ${landmark.entityId}")
+                        "${landmark.landmark} with entityId ${landmark.entityId}"
+                    )
                     sb.appendln("confidence: ${landmark.confidence}")
 
                     // Multiple locations are possible, e.g., the location of the depicted

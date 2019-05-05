@@ -4,6 +4,9 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+// used for dagger annotations
+apply plugin: 'kotlin-kapt'
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -48,7 +51,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-natural-language-language-id-model:18.0.3'
     implementation 'com.google.firebase:firebase-ml-natural-language-smart-reply-model:18.0.0'
 
-
+    // dagger
+    implementation 'com.google.dagger:dagger:2.13'
+    kapt 'com.google.dagger:dagger-compiler:2.13'
 }
 
 apply plugin: 'com.google.gms.google-services'

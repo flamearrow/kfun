@@ -1,29 +1,25 @@
 package band.mlgb.kfun
 
 import android.graphics.Bitmap
+import android.os.Bundle
 import android.widget.Toast
-import com.google.firebase.ml.vision.FirebaseVision
+import band.mlgb.kfun.inject.DaggerFirebaseComponent
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
-import com.google.firebase.ml.vision.label.FirebaseVisionOnDeviceImageLabelerOptions
+import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler
+import javax.inject.Inject
 
 // Object detection
 class ImageLabelingActivity : PickImageActivity() {
+    @Inject
+    lateinit var labeler: FirebaseVisionImageLabeler
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        DaggerFirebaseComponent.create().inject(this)
+    }
     override fun handleImage(bitmap: Bitmap) {
         val image = FirebaseVisionImage.fromBitmap(bitmap)
 
-        // get labeler with threshold
-        val labeler = FirebaseVision.getInstance().getOnDeviceImageLabeler(
-            FirebaseVisionOnDeviceImageLabelerOptions.Builder()
-                .setConfidenceThreshold(0.7f)
-                .build()
-        )
-
-        // use object: blah to create an actual listener instance
-//        labeler.processImage(image).addOnSuccessListener(object: OnSuccessListener<List<FirebaseVisionImageLabel>> {
-//            override fun onSuccess(p0: List<FirebaseVisionImageLabel>?) {
-//            }
-//
-//        })
         labeler.processImage(image).addOnSuccessListener { labels ->
             if (labels.size <= 0) {
                 Toast.makeText(applicationContext, "nothing detected", Toast.LENGTH_SHORT).show()

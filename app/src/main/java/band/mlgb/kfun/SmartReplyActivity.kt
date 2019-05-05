@@ -1,19 +1,22 @@
 package band.mlgb.kfun
 
 import android.os.Bundle
+import band.mlgb.kfun.inject.DaggerFirebaseComponent
 import com.google.android.gms.tasks.Task
 import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage
 import com.google.firebase.ml.naturallanguage.smartreply.FirebaseSmartReply
 import com.google.firebase.ml.naturallanguage.smartreply.FirebaseTextMessage
 import com.google.firebase.ml.naturallanguage.smartreply.SmartReplySuggestionResult
-import java.lang.StringBuilder
+import javax.inject.Inject
 
 class SmartReplyActivity : InputTextActivity() {
 
-    private lateinit var smartReplyHandler: FirebaseSmartReply
+    @Inject
+    lateinit var smartReplyHandler: FirebaseSmartReply
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        DaggerFirebaseComponent.create().inject(this)
         smartReplyHandler = FirebaseNaturalLanguage.getInstance().smartReply
     }
 

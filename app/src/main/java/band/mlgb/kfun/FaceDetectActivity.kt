@@ -3,30 +3,31 @@ package band.mlgb.kfun
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Toast
-import com.google.firebase.ml.vision.FirebaseVision
+import band.mlgb.kfun.inject.DaggerFirebaseComponent
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
-import com.google.firebase.ml.vision.face.*
-import java.lang.StringBuilder
+import com.google.firebase.ml.vision.face.FirebaseVisionFace
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceContour
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark
+import javax.inject.Inject
+import javax.inject.Named
 
 class FaceDetectActivity : PickImageActivity() {
-    private lateinit var highAccuracyFaceDetector: FirebaseVisionFaceDetector
-    private lateinit var realtimeFaceDetector: FirebaseVisionFaceDetector
+    // see https://kotlinlang.org/docs/reference/annotations.html for weird annotation
+    // TlDR: when annotating a property or a primary constructor parameter,
+    // weird prefixes(aka Annotation Use-site Targets) need to be applied,
+    // here @field is added in front of @Named to make sense of it.
+    // There are other prefixes to be applied also.
+    @Inject
+    @field:Named("accurate")
+    lateinit var highAccuracyFaceDetector: FirebaseVisionFaceDetector
+    @Inject
+    @field:Named("realtime")
+    lateinit var realtimeFaceDetector: FirebaseVisionFaceDetector
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseVisionFaceDetectorOptions.Builder().setPerformanceMode(
-            FirebaseVisionFaceDetectorOptions.ACCURATE
-        ).setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
-            .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS).build().let {
-                highAccuracyFaceDetector = FirebaseVision.getInstance().getVisionFaceDetector(it)
-            }
-        FirebaseVisionFaceDetectorOptions.Builder()
-            .setContourMode(FirebaseVisionFaceDetectorOptions.ALL_CONTOURS)
-            .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
-            .build().let {
-                realtimeFaceDetector = FirebaseVision.getInstance().getVisionFaceDetector(it)
-            }
-
+        DaggerFirebaseComponent.create().inject(this)
 
     }
 

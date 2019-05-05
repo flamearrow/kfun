@@ -1,24 +1,29 @@
 package band.mlgb.kfun
 
 import android.graphics.Bitmap
+import android.os.Bundle
 import android.widget.Toast
-import com.google.firebase.ml.vision.FirebaseVision
+import band.mlgb.kfun.inject.DaggerFirebaseComponent
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
-import com.google.firebase.ml.vision.text.FirebaseVisionCloudTextRecognizerOptions
-import java.util.*
+import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer
+import javax.inject.Inject
 
 // OCR
 class TextDetectionActivity : PickImageActivity() {
+    @Inject
+    lateinit var firebaseVisionTextRecognizer: FirebaseVisionTextRecognizer
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        DaggerFirebaseComponent.create().inject(this)
+    }
+
     override fun handleImage(bitmap: Bitmap) {
         toggleLoading(true)
         val image = FirebaseVisionImage.fromBitmap(bitmap)
-//        val detector = FirebaseVision.getInstance().cloudTextRecognizer
-//        val detector = FirebaseVision.getInstance().onDeviceTextRecognizer
-        // supported languages: https://cloud.google.com/vision/docs/languages
-        val detector = FirebaseVision.getInstance().getCloudTextRecognizer(
-            FirebaseVisionCloudTextRecognizerOptions.Builder().setLanguageHints(Arrays.asList("en", "cn")).build()
-        )
-        detector.processImage(image).addOnSuccessListener {
+//        val firebaseVisionTextRecognizer = FirebaseVision.getInstance().cloudTextRecognizer
+//        val firebaseVisionTextRecognizer = FirebaseVision.getInstance().onDeviceTextRecognizer
+        firebaseVisionTextRecognizer.processImage(image).addOnSuccessListener {
             // of Type FireBaseVisionText
                 firebaseVisionText ->
             toggleLoading(false)
