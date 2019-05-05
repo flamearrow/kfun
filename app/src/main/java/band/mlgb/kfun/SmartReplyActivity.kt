@@ -10,7 +10,7 @@ import java.lang.StringBuilder
 
 class SmartReplyActivity : InputTextActivity() {
 
-    var smartReplyHandler: FirebaseSmartReply? = null
+    private lateinit var smartReplyHandler: FirebaseSmartReply
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

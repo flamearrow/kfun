@@ -11,7 +11,7 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOption
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 
 class BarcodeDetectorActivity : PickImageActivity() {
-    private var barcodeDetector: FirebaseVisionBarcodeDetector? = null
+    private lateinit var barcodeDetector: FirebaseVisionBarcodeDetector
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -9,7 +9,7 @@ import com.google.firebase.ml.vision.cloud.landmark.FirebaseVisionCloudLandmarkD
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 
 class LandmarkDetectorActivity : PickImageActivity() {
-    private var landmarkDetector: FirebaseVisionCloudLandmarkDetector? = null
+    private lateinit var landmarkDetector: FirebaseVisionCloudLandmarkDetector
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

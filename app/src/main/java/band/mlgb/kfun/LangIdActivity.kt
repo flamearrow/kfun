@@ -7,12 +7,11 @@ import com.google.firebase.ml.naturallanguage.languageid.FirebaseLanguageIdentif
 import java.lang.StringBuilder
 
 class LangIdActivity : InputTextActivity() {
+    private lateinit var langIdIdentifier: FirebaseLanguageIdentification
+
     override fun buttonText(): String {
         return "Detect language"
     }
-
-    var langIdIdentifier: FirebaseLanguageIdentification? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

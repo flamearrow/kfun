@@ -9,8 +9,8 @@ import com.google.firebase.ml.vision.face.*
 import java.lang.StringBuilder
 
 class FaceDetectActivity : PickImageActivity() {
-    private var highAccuracyFaceDetector: FirebaseVisionFaceDetector? = null
-    private var realtimeFaceDetector: FirebaseVisionFaceDetector? = null
+    private lateinit var highAccuracyFaceDetector: FirebaseVisionFaceDetector
+    private lateinit var realtimeFaceDetector: FirebaseVisionFaceDetector
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
