@@ -34,4 +34,10 @@
         android:layout_height="wrap_content"
         android:onClick="landmarkDetect"
         android:text="@string/landmark_detection" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="langDetect"
+        android:text="@string/lang_detect" />
 </LinearLayout>

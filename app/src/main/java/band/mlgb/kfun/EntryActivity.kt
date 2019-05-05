@@ -30,4 +30,8 @@ class EntryActivity : AppCompatActivity() {
     fun landmarkDetect(view: View) {
         startActivity(Intent(applicationContext, LandmarkDetectorActivity::class.java))
     }
+
+    fun langDetect(view: View) {
+        startActivity(Intent(applicationContext, LangIdActivity::class.java))
+    }
 }

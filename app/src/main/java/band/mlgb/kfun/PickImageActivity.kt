@@ -35,12 +35,12 @@ abstract class PickImageActivity : AppCompatActivity() {
         setContentView(R.layout.activity_pick_image)
         fab.setOnClickListener(takePicListener)
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
-        result_view.movementMethod = ScrollingMovementMethod()
+        result.movementMethod = ScrollingMovementMethod()
     }
 
     private val takePicListener: View.OnClickListener = View.OnClickListener {
         lastPicTakenUri = null
-        result_view.text = null
+        result.text = null
         // In order to take a higher resolution picture, need to save the file to uri first
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
             // 'it' is overriden to 'intent'
@@ -81,7 +81,7 @@ abstract class PickImageActivity : AppCompatActivity() {
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         image.setImageBitmap(null)
-        result_view.text = ""
+        result.text = ""
         when (item.itemId) {
             R.id.navigation_home -> {
                 // put lambda inside ()
@@ -151,9 +151,9 @@ abstract class PickImageActivity : AppCompatActivity() {
 
     abstract fun handleImage(bitmap: Bitmap)
 
-    fun postResult(result: String?) {
+    fun postResult(resultText: String?) {
         // ?: if result is null, instead of returning null, return ""
-        result_view.text = result ?: ""
+        result.text = resultText ?: ""
     }
 
     @Throws(IOException::class)
@@ -177,11 +177,11 @@ abstract class PickImageActivity : AppCompatActivity() {
         // ternary operator in python style
 //        result_view.text = if (isLoading) "loading..." else ""
         if (isLoading) {
-            result_view.visibility = View.GONE
+            result.visibility = View.GONE
             progress_circular.visibility = View.VISIBLE
         } else {
-            result_view.text = ""
-            result_view.visibility = View.VISIBLE
+            result.text = ""
+            result.visibility = View.VISIBLE
             progress_circular.visibility = View.GONE
         }
     }

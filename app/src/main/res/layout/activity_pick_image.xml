@@ -5,7 +5,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ImageLabelingActivity">
+    tools:context=".PickImageActivity">
 
     <ImageView
         android:id="@+id/image"
@@ -37,7 +37,7 @@
             android:visibility="gone" />
 
         <TextView
-            android:id="@+id/result_view"
+            android:id="@+id/result"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="10dp"

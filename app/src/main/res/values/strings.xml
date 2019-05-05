@@ -12,4 +12,6 @@
     <string name="landmark_detection">Landmark Detection</string>
     <string name="barcode_detection">Barcode Detection</string>
     <string name="kfun_deeplink">Kfun Deeplink</string>
+    <string name="input_hint">type something here</string>
+    <string name="lang_detect">Detect language</string>
 </resources>
