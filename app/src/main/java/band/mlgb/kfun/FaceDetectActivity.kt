@@ -35,6 +35,7 @@ class FaceDetectActivity : PickImageActivity() {
         toggleLoading(true)
         val image = FirebaseVisionImage.fromBitmap(bitmap)
         highAccuracyFaceDetector?.detectInImage(image)?.addOnSuccessListener { faces ->
+            toggleLoading(false)
             if (faces.isEmpty()) {
                 Toast.makeText(applicationContext, "no face detected", Toast.LENGTH_SHORT).show()
                 return@addOnSuccessListener
@@ -77,7 +78,6 @@ class FaceDetectActivity : PickImageActivity() {
 
                 }
             }
-            toggleLoading(false)
             postResult(sb.toString())
         }?.addOnFailureListener { result ->
             toggleLoading(false)
