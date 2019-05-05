@@ -14,4 +14,5 @@
     <string name="kfun_deeplink">Kfun Deeplink</string>
     <string name="input_hint">type something here</string>
     <string name="lang_detect">Detect language</string>
+    <string name="smart_reply">Smart Reply</string>
 </resources>

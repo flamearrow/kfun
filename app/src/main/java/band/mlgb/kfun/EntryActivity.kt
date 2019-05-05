@@ -34,4 +34,8 @@ class EntryActivity : AppCompatActivity() {
     fun langDetect(view: View) {
         startActivity(Intent(applicationContext, LangIdActivity::class.java))
     }
+
+    fun smartReply(view: View) {
+        startActivity(Intent(applicationContext, SmartReplyActivity::class.java))
+    }
 }
