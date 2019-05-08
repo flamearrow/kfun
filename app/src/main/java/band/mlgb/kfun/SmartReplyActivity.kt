@@ -9,6 +9,9 @@ import com.google.firebase.ml.naturallanguage.smartreply.SmartReplySuggestionRes
 import javax.inject.Inject
 
 class SmartReplyActivity : InputTextActivity() {
+    companion object {
+        const val REMOTE_USER_NAME = "userId0"
+    }
 
     @Inject
     lateinit var smartReplyHandler: FirebaseSmartReply
@@ -26,8 +29,20 @@ class SmartReplyActivity : InputTextActivity() {
         return "Input some text here and get suggestions on replying them"
     }
 
+    // Note: need to create a list of messages, with RemoteUser message last in order to trigger some valid reply
+    fun generateConversationList(): List<FirebaseTextMessage> {
+        return mutableListOf(
+            FirebaseTextMessage.createForLocalUser(
+                "heading out now", System.currentTimeMillis()
+            ),
+            FirebaseTextMessage.createForRemoteUser(
+                "Are you coming back soon?", System.currentTimeMillis(), REMOTE_USER_NAME
+            )
+        )
+    }
+
     override fun handleText(input: String) {
-        FirebaseTextMessage.createForLocalUser(input, System.currentTimeMillis()).let {
+        FirebaseTextMessage.createForRemoteUser(input, System.currentTimeMillis(), REMOTE_USER_NAME).let {
             smartReplyHandler.suggestReplies(it)?.addOnSuccessListener { result ->
                 if (result.status == SmartReplySuggestionResult.STATUS_NOT_SUPPORTED_LANGUAGE) {
                     toastShort("this language is not supported")
