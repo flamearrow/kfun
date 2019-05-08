@@ -11,4 +11,5 @@ interface FirebaseComponent {
     fun inject(activity: LandmarkDetectorActivity)
     fun inject(activity: ImageLabelingActivity)
     fun inject(activity: FaceDetectActivity)
+    fun inject(activity: TranslatorActivity)
 }

@@ -38,4 +38,8 @@ class EntryActivity : AppCompatActivity() {
     fun smartReply(view: View) {
         startActivity(Intent(applicationContext, SmartReplyActivity::class.java))
     }
+
+    fun translate(view: View) {
+        startActivity(Intent(applicationContext, TranslatorActivity::class.java))
+    }
 }

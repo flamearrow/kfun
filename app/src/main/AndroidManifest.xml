@@ -63,7 +63,7 @@
 
                 <data
                     android:host="www.mlgb.band"
-                    android:pathPrefix="/text_detection"
+                    android:pathPrefix="/face_detection"
                     android:scheme="http" />
             </intent-filter>
         </activity>
@@ -78,7 +78,7 @@
 
                 <data
                     android:host="www.mlgb.band"
-                    android:pathPrefix="/text_detection"
+                    android:pathPrefix="/barcode"
                     android:scheme="http" />
             </intent-filter>
         </activity>
@@ -93,7 +93,7 @@
 
                 <data
                     android:host="www.mlgb.band"
-                    android:pathPrefix="/text_detection"
+                    android:pathPrefix="/landmark"
                     android:scheme="http" />
             </intent-filter>
         </activity>
@@ -108,7 +108,7 @@
 
                 <data
                     android:host="www.mlgb.band"
-                    android:pathPrefix="/text_detection"
+                    android:pathPrefix="/langid"
                     android:scheme="http" />
             </intent-filter>
         </activity>
@@ -123,7 +123,22 @@
 
                 <data
                     android:host="www.mlgb.band"
-                    android:pathPrefix="/text_detection"
+                    android:pathPrefix="/smartreply"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TranslatorActivity"
+            android:label="@string/translate">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.mlgb.band"
+                    android:pathPrefix="/translate"
                     android:scheme="http" />
             </intent-filter>
         </activity>
