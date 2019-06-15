@@ -142,6 +142,7 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
+        <activity android:name=".camerax.CameraXActivity"/>
 
         <!--automatically download new models on device, if app is posted to app store, the model will be predownloaded when it's installed-->
         <!--label: image labeling-->

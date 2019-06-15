@@ -16,4 +16,5 @@
     <string name="lang_detect">Detect language</string>
     <string name="smart_reply">Smart Reply</string>
     <string name="translate">Translate</string>
+    <string name="camerax">Camera X</string>
 </resources>

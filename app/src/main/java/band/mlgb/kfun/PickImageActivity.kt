@@ -11,6 +11,7 @@ import android.text.method.ScrollingMovementMethod
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import band.mlgb.kfun.camerax.CameraXActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_pick_image.*
 import java.io.File
@@ -42,7 +43,8 @@ abstract class PickImageActivity : AppCompatActivity() {
         lastPicTakenUri = null
         result.text = null
         // In order to take a higher resolution picture, need to save the file to uri first
-        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
+//        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
+        Intent(applicationContext, CameraXActivity::class.java).also { intent ->
             // 'it' is overriden to 'intent'
             intent.resolveActivity(packageManager)?.also {
                 // we only apply the following logic when
@@ -62,7 +64,9 @@ abstract class PickImageActivity : AppCompatActivity() {
                         // buffer the uri, need to access it when activity returns
                         lastPicTakenUri = photoUri
                         // create file and tell the intent to save pic to this uri
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+//                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+//                        intent.putExtra("mlgb", file.absolutePath)
+                        intent.putExtra(CameraXActivity.FILE_TO_SAVE, file)
                         startActivityForResult(intent, TAKE_PICTURE_WITH_CAMERA)
                     }
                 }
