@@ -1,6 +1,7 @@
 package band.mlgb.kfun
 
 import android.graphics.Bitmap
+import android.media.Image
 import android.os.Bundle
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
@@ -25,11 +26,11 @@ class BarcodeDetectorActivity : PickImageActivity() {
             }
     }
 
-    override fun handleImage(bitmap: Bitmap) {
-        FirebaseVisionImage.fromBitmap(bitmap).let {
+    private fun processImage(image: FirebaseVisionImage, handleResult: (String) -> Unit) {
+        image.let {
             toggleLoading(true)
             barcodeDetector?.detectInImage(it)?.addOnSuccessListener { barcodes ->
-                val sb = StringBuilder().also {sb->
+                val sb = StringBuilder().also { sb ->
                     sb.appendln("found ${barcodes.size} barcodes")
                 }
 
@@ -54,14 +55,20 @@ class BarcodeDetectorActivity : PickImageActivity() {
                     }
                 }
                 toggleLoading(false)
-                postResult(sb.toString())
-
-
+                handleResult(sb.toString())
             }?.addOnFailureListener {
                 toggleLoading(false)
-
+                toastShort(it.localizedMessage)
             }
         }
+    }
+
+    override fun handleImage(bitmap: Bitmap) {
+        processImage(FirebaseVisionImage.fromBitmap(bitmap), ::postResult)
+    }
+
+    override fun handleLiveImage(image: Image, rotation: Int) {
+        processImage(FirebaseVisionImage.fromMediaImage(image, rotation), ::postLiveResult)
     }
 
 }

@@ -1,8 +1,8 @@
 package band.mlgb.kfun
 
 import android.graphics.Bitmap
+import android.media.Image
 import android.os.Bundle
-import android.widget.Toast
 import band.mlgb.kfun.inject.DaggerFirebaseComponent
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.face.FirebaseVisionFace
@@ -31,13 +31,17 @@ class FaceDetectActivity : PickImageActivity() {
 
     }
 
-    override fun handleImage(bitmap: Bitmap) {
+    private fun processImage(
+        faceDector: FirebaseVisionFaceDetector,
+        fbImage: FirebaseVisionImage,
+        handleResult: (String) -> Unit,
+        handleEmptyResult: () -> Unit
+    ) {
         toggleLoading(true)
-        val image = FirebaseVisionImage.fromBitmap(bitmap)
-        highAccuracyFaceDetector?.detectInImage(image)?.addOnSuccessListener { faces ->
+        faceDector.detectInImage(fbImage)?.addOnSuccessListener { faces ->
             toggleLoading(false)
             if (faces.isEmpty()) {
-                Toast.makeText(applicationContext, "no face detected", Toast.LENGTH_SHORT).show()
+                handleEmptyResult()
                 return@addOnSuccessListener
             }
             val sb = StringBuilder().also { it.appendln("Detected ${faces.size} faces") }
@@ -78,11 +82,24 @@ class FaceDetectActivity : PickImageActivity() {
 
                 }
             }
-            postResult(sb.toString())
+
+            handleResult(sb.toString())
         }?.addOnFailureListener { result ->
             toggleLoading(false)
-            Toast.makeText(applicationContext, result.localizedMessage, Toast.LENGTH_SHORT).show()
+            toastShort(result.localizedMessage)
         }
+
+    }
+
+
+    override fun handleImage(bitmap: Bitmap) {
+        processImage(highAccuracyFaceDetector, FirebaseVisionImage.fromBitmap(bitmap), ::postResult) {
+            toastShort("no face detected")
+        }
+    }
+
+    override fun handleLiveImage(image: Image, rotation: Int) {
+        processImage(realtimeFaceDetector, FirebaseVisionImage.fromMediaImage(image, rotation), ::postLiveResult) {}
     }
 
 }

@@ -1,8 +1,8 @@
 package band.mlgb.kfun
 
 import android.graphics.Bitmap
+import android.media.Image
 import android.os.Bundle
-import android.widget.Toast
 import band.mlgb.kfun.inject.DaggerFirebaseComponent
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer
@@ -18,11 +18,12 @@ class TextDetectionActivity : PickImageActivity() {
         DaggerFirebaseComponent.create().inject(this)
     }
 
-    override fun handleImage(bitmap: Bitmap) {
+    private fun processImage(
+        image: FirebaseVisionImage,
+        handleResult: (String) -> Unit,
+        handleEmptyResult: () -> Unit
+    ) {
         toggleLoading(true)
-        val image = FirebaseVisionImage.fromBitmap(bitmap)
-//        val firebaseVisionTextRecognizer = FirebaseVision.getInstance().cloudTextRecognizer
-//        val firebaseVisionTextRecognizer = FirebaseVision.getInstance().onDeviceTextRecognizer
         firebaseVisionTextRecognizer.processImage(image).addOnSuccessListener {
             // of Type FireBaseVisionText
                 firebaseVisionText ->
@@ -55,17 +56,27 @@ class TextDetectionActivity : PickImageActivity() {
                     sb.appendln("---------")
                 }
                 if (sb.isNotEmpty()) {
-                    postResult(sb.toString())
+                    handleResult(sb.toString())
                 } else {
-                    Toast.makeText(applicationContext, "nothing detected", Toast.LENGTH_SHORT).show()
+                    handleEmptyResult()
                 }
             } else {
-                Toast.makeText(applicationContext, "nothing detected", Toast.LENGTH_SHORT).show()
+                handleEmptyResult()
 
             }
         }.addOnFailureListener { result ->
             toggleLoading(false)
-            Toast.makeText(applicationContext, result.localizedMessage, Toast.LENGTH_SHORT).show()
+            toastShort(result.localizedMessage)
         }
+    }
+
+    override fun handleImage(bitmap: Bitmap) {
+        processImage(FirebaseVisionImage.fromBitmap(bitmap), ::postResult) {
+            toastShort("nothing detected")
+        }
+    }
+
+    override fun handleLiveImage(image: Image, rotation: Int) {
+        processImage(FirebaseVisionImage.fromMediaImage(image, rotation), ::postLiveResult) {}
     }
 }

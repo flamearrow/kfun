@@ -50,13 +50,14 @@ fun Image.toByteArray(): ByteArray {
 }
 
 fun Image.toBitmap(): Bitmap {
-
-
-
+    // doesn't work
     val buffer = planes[0].buffer
     val bytes = ByteArray(buffer.capacity())
     buffer.get(bytes)
-    return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, null)
+    val opts = BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.RGB_565 }
+    val ret = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+
+    return ret
 
 
 //    val buffer = planes[0].buffer

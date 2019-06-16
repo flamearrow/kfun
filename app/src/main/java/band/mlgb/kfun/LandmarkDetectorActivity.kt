@@ -1,12 +1,13 @@
 package band.mlgb.kfun
 
 import android.graphics.Bitmap
+import android.media.Image
 import android.os.Bundle
-import android.widget.Toast
 import band.mlgb.kfun.inject.DaggerFirebaseComponent
 import com.google.firebase.ml.vision.cloud.landmark.FirebaseVisionCloudLandmarkDetector
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import javax.inject.Inject
+
 
 class LandmarkDetectorActivity : PickImageActivity() {
     @Inject
@@ -17,12 +18,17 @@ class LandmarkDetectorActivity : PickImageActivity() {
         DaggerFirebaseComponent.create().inject(this)
     }
 
-    override fun handleImage(bitmap: Bitmap) {
+    private fun processImage(
+        image: FirebaseVisionImage,
+        handleResult: (String) -> Unit,
+        handleEmptyResult: () -> Unit
+    ) {
         toggleLoading(true)
-        FirebaseVisionImage.fromBitmap(bitmap).let {
-            landmarkDetector?.detectInImage(it)?.addOnSuccessListener { landmarks ->
+        image.let {
+            landmarkDetector.detectInImage(it)?.addOnSuccessListener { landmarks ->
                 if (landmarks.isEmpty()) {
-                    Toast.makeText(applicationContext, "no landmarks found", Toast.LENGTH_SHORT).show()
+                    toggleLoading(false)
+                    handleEmptyResult()
                     return@addOnSuccessListener
                 }
                 val sb = StringBuilder().also { sb ->
@@ -46,12 +52,21 @@ class LandmarkDetectorActivity : PickImageActivity() {
                     }
                 }
                 toggleLoading(false)
-                postResult(sb.toString())
+                handleResult(sb.toString())
             }?.addOnFailureListener { result ->
                 toggleLoading(false)
-                Toast.makeText(applicationContext, result.localizedMessage, Toast.LENGTH_SHORT).show()
+                toastShort(result.localizedMessage)
             }
         }
+
+    }
+
+    override fun handleImage(bitmap: Bitmap) {
+        processImage(FirebaseVisionImage.fromBitmap(bitmap), ::postResult) { toastShort("no land marks found") }
+    }
+
+    override fun handleLiveImage(image: Image, rotation: Int) {
+        processImage(FirebaseVisionImage.fromMediaImage(image, rotation), ::postLiveResult) {}
     }
 
 }

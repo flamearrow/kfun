@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/live_camera"
+        android:icon="@drawable/baseline_trip_origin_24"
+        android:title="@string/livecamera"/>
 
     <item
-            android:id="@+id/navigation_home"
+            android:id="@+id/take_picture"
             android:icon="@drawable/baseline_camera_24"
             android:title="@string/camera"/>
 
     <item
-            android:id="@+id/navigation_dashboard"
+            android:id="@+id/gallery"
             android:icon="@drawable/baseline_photo_24"
             android:title="@string/gallery"/>
 
