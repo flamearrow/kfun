@@ -10,11 +10,12 @@ import android.view.TextureView
 import android.view.ViewGroup
 import androidx.camera.core.*
 
-fun createPreviewUsecase(viewFinder: TextureView): Preview {
+fun createPreviewUsecase(viewFinder: TextureView, lenseFacing: CameraX.LensFacing = CameraX.LensFacing.BACK): Preview {
     return Preview(
         PreviewConfig.Builder().apply {
             setTargetAspectRatio(Rational(1, 1))
             setTargetResolution(Size(640, 640))
+            setLensFacing(lenseFacing)
         }.build()
     ).apply {
         // Every time the viewfinder is updated, recompute layout
@@ -30,17 +31,21 @@ fun createPreviewUsecase(viewFinder: TextureView): Preview {
     }
 }
 
-fun createImageCaptureUsecase(): ImageCapture {
+fun createImageCaptureUsecase(lenseFacing: CameraX.LensFacing = CameraX.LensFacing.BACK): ImageCapture {
     return ImageCapture(
         ImageCaptureConfig.Builder()
             .apply {
                 setTargetAspectRatio(Rational(1, 1))
                 setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY)
+                setLensFacing(lenseFacing)
             }.build()
     )
 }
 
-fun createAnalysisUsecase(resultUpdater: LiveImageAnalyzer.LiveResultUpdater): ImageAnalysis {
+fun createAnalysisUsecase(
+    resultUpdater: LiveImageAnalyzer.LiveResultUpdater,
+    lenseFacing: CameraX.LensFacing = CameraX.LensFacing.BACK
+): ImageAnalysis {
     // Build the image analysis use case and instantiate our analyzer
     return ImageAnalysis(
         ImageAnalysisConfig.Builder().apply {
@@ -54,6 +59,7 @@ fun createAnalysisUsecase(resultUpdater: LiveImageAnalyzer.LiveResultUpdater): I
             setImageReaderMode(
                 ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE
             )
+            setLensFacing(lenseFacing)
         }.build()
     ).apply {
         analyzer = LiveImageAnalyzer(resultUpdater)

@@ -25,6 +25,8 @@ class FaceDetectActivity : PickImageActivity() {
     @field:Named("realtime")
     lateinit var realtimeFaceDetector: FirebaseVisionFaceDetector
 
+    private var lastImageProcessed = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DaggerFirebaseComponent.create().inject(this)
@@ -37,8 +39,14 @@ class FaceDetectActivity : PickImageActivity() {
         handleResult: (String) -> Unit,
         handleEmptyResult: () -> Unit
     ) {
+        // if last image is not processed, drop this image
+        if (!lastImageProcessed) {
+            return
+        }
         toggleLoading(true)
+        lastImageProcessed = false
         faceDector.detectInImage(fbImage)?.addOnSuccessListener { faces ->
+            lastImageProcessed = true
             toggleLoading(false)
             if (faces.isEmpty()) {
                 handleEmptyResult()
@@ -82,10 +90,10 @@ class FaceDetectActivity : PickImageActivity() {
 
                 }
             }
-
             handleResult(sb.toString())
         }?.addOnFailureListener { result ->
             toggleLoading(false)
+            lastImageProcessed = true
             toastShort(result.localizedMessage)
         }
 
@@ -99,7 +107,11 @@ class FaceDetectActivity : PickImageActivity() {
     }
 
     override fun handleLiveImage(image: Image, rotation: Int) {
-        processImage(realtimeFaceDetector, FirebaseVisionImage.fromMediaImage(image, rotation), ::postLiveResult) {}
+        processImage(
+            highAccuracyFaceDetector,
+            FirebaseVisionImage.fromMediaImage(image, rotation),
+            ::postLiveResult
+        ) { toastShort("no face detected") }
     }
 
 }
