@@ -1,7 +1,7 @@
 # kfun
 An app playing around with MLKit and android Jetpack, built with kotlin
 
-# MLKit
+## MLKit
 * ml-vision
   * Image labeling
   * Text detection
@@ -14,7 +14,7 @@ An app playing around with MLKit and android Jetpack, built with kotlin
   * Smart reply
   * Translate
 
-# Jetpack
+## Jetpack
 * CameraX
 * Lifecycle
 * LiveData
