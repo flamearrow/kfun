@@ -5,28 +5,20 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
-import android.os.HandlerThread
 import android.provider.MediaStore
 import android.text.method.ScrollingMovementMethod
-import android.util.Rational
-import android.util.Size
-import android.view.Surface
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.ViewGroup
-import androidx.camera.core.*
+import androidx.camera.core.CameraX
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import band.mlgb.kfun.camerax.CameraXActivity
-import band.mlgb.kfun.camerax.LiveImageAnalyzer
+import band.mlgb.kfun.camerax.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_pick_image.*
 import java.io.File
@@ -53,6 +45,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
     }
 
     private var lastPicTakenUri: Uri? = null
+    private var liveCameraOwner: LiveCameraOwner = LiveCameraOwner()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +60,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
     private fun initializeViewFinder() {
         // Request camera permissions
         if (allPermissionsGranted()) {
-            view_finder.post { startCamera() }
+            view_finder.post { bindCameraXUsecases() }
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
@@ -76,71 +69,19 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
 
         // Every time the provided texture view changes, recompute layout
         view_finder.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            updateTransform()
+            updateTransform(view_finder)
         }
     }
 
-    private fun startCamera() {
-        // Set up view_finder, create a preview usecase and anaylzer usecase
-        val previewConfig = PreviewConfig.Builder().apply {
-            setTargetAspectRatio(Rational(1, 1))
-            setTargetResolution(Size(640, 1024))
-        }.build()
-
-        val previewUseCase = Preview(previewConfig)
-        // Every time the view_finder is updated, recompute layout
-        previewUseCase.setOnPreviewOutputUpdateListener {
-            // To update the SurfaceTexture, we have to remove it and re-add it
-            val parent = view_finder.parent as ViewGroup
-            parent.removeView(view_finder)
-            parent.addView(view_finder, 0)
-            view_finder.surfaceTexture = it.surfaceTexture
-            updateTransform()
-        }
-
-
-        // Setup image analysis pipeline that computes average pixel luminance, creates a ImageAnalysis as a usecase
-        val analyzerConfig = ImageAnalysisConfig.Builder().apply {
-            // Use a worker thread for image analysis to prevent glitches
-            val analyzerThread = HandlerThread(
-                "LiveCameraAnalyze"
-            ).apply { start() }
-            setCallbackHandler(Handler(analyzerThread.looper))
-            // In our analysis, we care more about the latest image than
-            // analyzing *every* image
-            setImageReaderMode(
-                ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE
-            )
-        }.build()
-
-        // Build the image analysis use case and instantiate our analyzer
-        val analyzerUseCase = ImageAnalysis(analyzerConfig).apply {
-            analyzer = LiveImageAnalyzer(this@PickImageActivity)
-        }
-
+    // create a preview and analyze use case and bind camera to liveCameraOwner
+    // When liveCameraOwner is destoryed, need to rebind to a started state
+    private fun bindCameraXUsecases() {
         // Bind use cases to lifecycle, both preview and imageCapture are usecases
-        CameraX.bindToLifecycle(this, previewUseCase, analyzerUseCase)
-    }
-
-    private fun updateTransform() {
-        val matrix = Matrix()
-
-        // Compute the center of the view finder
-        val centerX = view_finder.width / 2f
-        val centerY = view_finder.height / 2f
-
-        // Correct preview output to account for display rotation
-        val rotationDegrees = when (view_finder.display.rotation) {
-            Surface.ROTATION_0 -> 0
-            Surface.ROTATION_90 -> 90
-            Surface.ROTATION_180 -> 180
-            Surface.ROTATION_270 -> 270
-            else -> return
-        }
-        matrix.postRotate(-rotationDegrees.toFloat(), centerX, centerY)
-
-        // Finally, apply transformations to our TextureView
-        view_finder.setTransform(matrix)
+        CameraX.bindToLifecycle(
+            liveCameraOwner,
+            createPreviewUsecase(view_finder),
+            createAnalysisUsecase(this@PickImageActivity)
+        )
     }
 
     /**
@@ -213,6 +154,9 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
                 fab.visibility = GONE
                 image.visibility = GONE
                 live_container.visibility = VISIBLE
+
+                liveCameraOwner.startCamera()
+                bindCameraXUsecases()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.take_picture -> {
@@ -234,6 +178,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
                 live_container.visibility = GONE
                 fab.setOnClickListener(takePicListener)
                 fab.setImageResource(R.drawable.baseline_camera_24)
+                liveCameraOwner.stopCamera() // will unbind cameraX usesaces, need to rebind
                 return@OnNavigationItemSelectedListener true
             }
             R.id.gallery -> {
@@ -242,6 +187,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
                 live_container.visibility = GONE
                 fab.setOnClickListener(pickPicListener)
                 fab.setImageResource(R.drawable.baseline_photo_24)
+                liveCameraOwner.stopCamera()
                 return@OnNavigationItemSelectedListener true
             }
         }

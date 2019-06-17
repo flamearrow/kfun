@@ -1,7 +1,5 @@
 package band.mlgb.kfun.camerax
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.Image
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy

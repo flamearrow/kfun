@@ -4,9 +4,7 @@ package band.mlgb.kfun
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.media.Image
 import android.net.Uri
 import android.os.Build
 import androidx.exifinterface.media.ExifInterface
@@ -38,43 +36,4 @@ private fun rotateImage(img: Bitmap, degree: Float): Bitmap {
         img.recycle()
         ret
     }
-}
-
-fun Image.toByteArray(): ByteArray {
-    val buffer = planes[0].buffer
-//    val pixels = ByteArray(buffer.remaining())
-    val pixels = ByteArray(23)
-//    buffer.get(pixels)
-//    System.arraycopy(buffer, 0, bytes, 0, buffer.capacity())
-    return pixels
-}
-
-fun Image.toBitmap(): Bitmap {
-    // doesn't work
-    val buffer = planes[0].buffer
-    val bytes = ByteArray(buffer.capacity())
-    buffer.get(bytes)
-    val opts = BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.RGB_565 }
-    val ret = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
-
-    return ret
-
-
-//    val buffer = planes[0].buffer
-//    val pixelStride = planes[0].pixelStride
-//    val rowStride = planes[0].rowStride
-//    val rowPadding = rowStride - pixelStride * width
-//    var bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888)
-//    bitmap.copyPixelsFromBuffer(buffer)
-//    bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height)
-//    return bitmap
-}
-
-fun ImageToByteArray(image:Image): ByteArray {
-    val buffer = image.planes[0].buffer
-//    val pixels = ByteArray(buffer.remaining())
-    val pixels = ByteArray(23)
-//    buffer.get(pixels)
-//    System.arraycopy(buffer, 0, bytes, 0, buffer.capacity())
-    return pixels
 }
