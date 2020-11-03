@@ -1,19 +1,17 @@
 package band.mlgb.kfun.camerax
 
 import android.Manifest
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.TextureView
 import android.widget.Toast
-import androidx.camera.core.CameraX
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
 import band.mlgb.kfun.KFunBaseActivity
 import band.mlgb.kfun.MLGBALifeCycleObserver
 import band.mlgb.kfun.R
@@ -36,13 +34,13 @@ private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 class CameraXActivity : KFunBaseActivity() {
     companion object {
         const val FILE_TO_SAVE = "FILE_TO_SAVE"
+        val TAG = CameraXActivity::javaClass.name
     }
 
-    // TextureView is used to display content stream, use it for cameraX
-    // to update its content, override TextureView.surfaceTexture, CameraX's Preview provides this
-    private lateinit var viewFinder: TextureView
 
     private var file: File? = null
+    private lateinit var previewUseCase: Preview
+    private lateinit var imageCaptureUseCase: ImageCapture
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,56 +48,71 @@ class CameraXActivity : KFunBaseActivity() {
         setContentView(R.layout.camera_x_activity)
 
 
-        intent.extras?.let {
-            file = it[FILE_TO_SAVE] as File
-        }
+        file = intent.extras?.let { it[FILE_TO_SAVE] as File } // ?: File("dumbFile")
 
-        viewFinder = view_finder
+
+        // image capture
+        imageCaptureUseCase = createImageCaptureUseCase()
+
+        // preview
+        previewUseCase = createPreviewUseCase(view_finder.surfaceProvider)
+
+        capture_button.setOnClickListener { takePhoto() }
 
         // Request camera permissions
         if (allPermissionsGranted()) {
-            viewFinder.post { startCamera() }
+            startCamera()
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
 
-        // Every time the provided texture view changes, recompute layout
-        viewFinder.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            updateTransform(viewFinder)
-        }
-
         lifecycle.addObserver(MLGBALifeCycleObserver())
     }
 
     private fun startCamera() {
-        val imageCaptureUseCase = createImageCaptureUsecase()
-        capture_button.setOnClickListener {
-            file?.also {
-                //only take picture when file is non null
-                imageCaptureUseCase.takePicture(file,
-                    object : ImageCapture.OnImageSavedListener {
-                        override fun onImageSaved(file: File) {
-                            setResult(Activity.RESULT_OK)
-                            finish()
-                        }
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        // run when this future is done on main executor
+        cameraProviderFuture.addListener({
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
-                        override fun onError(
-                            useCaseError: ImageCapture.UseCaseError,
-                            message: String,
-                            cause: Throwable?
-                        ) {
-                            toastShort(message)
-                        }
-
-                    })
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(
+                    this,
+                    cameraSelector,
+                    previewUseCase,
+                    imageCaptureUseCase
+                )
+            } catch (exec: Exception) {
+                Log.e(TAG, "use case binding failed", exec)
             }
+        }, ContextCompat.getMainExecutor(this))
 
+    }
+
+    fun takePhoto() {
+        file?.let {
+            imageCaptureUseCase.takePicture(
+                ImageCapture.OutputFileOptions.Builder(it).build(),
+                ContextCompat.getMainExecutor(this),
+                object : ImageCapture.OnImageSavedCallback {
+                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                        Log.d(TAG, "Image saved")
+                        setResult(RESULT_OK)
+                        finish()
+                    }
+
+                    override fun onError(exception: ImageCaptureException) {
+                        toastShort("Image save error")
+                    }
+                }
+            )
+        } ?: run {
+            toastShort("No file to save, take nothing")
         }
-
-        // Bind use cases to lifecycle, both preview and imageCapture are usecases
-        CameraX.bindToLifecycle(this, createPreviewUsecase(viewFinder), imageCaptureUseCase)
     }
 
     /**
@@ -109,9 +122,10 @@ class CameraXActivity : KFunBaseActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
-                viewFinder.post { startCamera() }
+                startCamera()
             } else {
                 Toast.makeText(
                     this,

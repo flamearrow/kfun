@@ -1,6 +1,8 @@
 package band.mlgb.kfun.camerax
 
 import android.media.Image
+import android.util.Log
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import java.util.concurrent.TimeUnit
@@ -17,7 +19,9 @@ class LiveImageAnalyzer(private val resultUpdater: LiveResultUpdater) : ImageAna
 
     private var lastAnalyzedTimestamp = 0L
 
-    override fun analyze(image: ImageProxy, rotationDegrees: Int) {
+    @ExperimentalGetImage
+    override fun analyze(image: ImageProxy) {
+        Log.d("BGLM", "LiveImageAnalyzer.analyze")
         val currentTimestamp = System.currentTimeMillis()
         if (currentTimestamp - lastAnalyzedTimestamp >=
             TimeUnit.SECONDS.toMillis(1)
@@ -28,5 +32,9 @@ class LiveImageAnalyzer(private val resultUpdater: LiveResultUpdater) : ImageAna
             // Update timestamp of last analyzed frame
             lastAnalyzedTimestamp = currentTimestamp
         }
+
+        // need to close in order to trigger the next analyze call
+        image.close()
     }
 }
+

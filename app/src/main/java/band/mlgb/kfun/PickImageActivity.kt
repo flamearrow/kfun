@@ -11,10 +11,14 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import androidx.camera.core.CameraX
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -46,11 +50,13 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
 
     private var lastPicTakenUri: Uri? = null
     private var liveCameraOwner: LiveCameraOwner = LiveCameraOwner()
-    private var lensFacing = CameraX.LensFacing.BACK
+    private var lensFacing = CameraSelector.DEFAULT_BACK_CAMERA
         set(value) {
-            bindCameraXUsecases(value)
+            startCamera(value)
             field = value
         }
+    private lateinit var previewUseCase: Preview
+    private lateinit var imageAnalysisUsecase: ImageAnalysis
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,35 +64,44 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
         fab.setOnClickListener(flipLiveCameraListener)
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         result.movementMethod = ScrollingMovementMethod()
-        initializeViewFinder()
+        initializeCamera()
     }
 
-    private fun initializeViewFinder() {
+    private fun initializeCamera() {
+        // image capture
+        imageAnalysisUsecase = createAnalysisUseCase(ContextCompat.getMainExecutor(this), this)
+        // preview
+        previewUseCase = createPreviewUseCase(view_finder.surfaceProvider)
+
         // Request camera permissions
         if (allPermissionsGranted()) {
-            view_finder.post { bindCameraXUsecases(lensFacing) }
+            startCamera(lensFacing)
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
 
-        // Every time the provided texture view changes, recompute layout
-        view_finder.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            updateTransform(view_finder)
-        }
     }
 
-    // create a preview and analyze use case and bind camera to liveCameraOwner
-    // When liveCameraOwner is destoryed, need to rebind to a started state
-    private fun bindCameraXUsecases(lensFacing: CameraX.LensFacing) {
-        CameraX.unbindAll()
-        // Bind use cases to lifecycle, both preview and imageCapture are usecases
-        CameraX.bindToLifecycle(
-            liveCameraOwner,
-            createPreviewUsecase(view_finder, lensFacing),
-            createAnalysisUsecase(this@PickImageActivity, lensFacing)
-        )
+    private fun startCamera(cameraSelector: CameraSelector) {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        // run when this future is done on main executor
+        cameraProviderFuture.addListener({
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(
+                    this,
+                    cameraSelector,
+                    previewUseCase,
+                    imageAnalysisUsecase
+                )
+            } catch (exec: Exception) {
+                Log.e(CameraXActivity.TAG, "use case binding failed", exec)
+            }
+        }, ContextCompat.getMainExecutor(this))
+
     }
 
     /**
@@ -105,7 +120,8 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
     }
 
     private val flipLiveCameraListener = View.OnClickListener {
-        lensFacing = if (lensFacing == CameraX.LensFacing.FRONT) CameraX.LensFacing.BACK else CameraX.LensFacing.FRONT
+        lensFacing =
+            if (lensFacing == CameraSelector.DEFAULT_BACK_CAMERA) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
     }
 
     private val takePicListener: View.OnClickListener = View.OnClickListener {
@@ -128,7 +144,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
                     FileProvider.getUriForFile(
                         this, // note this is always the current activity
                         "band.mlgb.kfun.fileprovider",
-                        file // it here is file
+                        file
                     )?.also { photoUri ->
                         // buffer the uri, need to access it when activity returns
                         lastPicTakenUri = photoUri
@@ -151,54 +167,55 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
         startActivityForResult(intent, PICK_PICTURE_WITH_GALLERY)
     }
 
-    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        image.setImageBitmap(null)
-        result.text = ""
-        when (item.itemId) {
-            R.id.live_camera -> {
-                // hide fab
-                // hide image
-                // show and initialize view_finder
-                image.visibility = GONE
-                live_container.visibility = VISIBLE
-                fab.setOnClickListener(flipLiveCameraListener)
-                fab.setImageResource(R.drawable.baseline_switch_camera_24)
-                liveCameraOwner.startCamera()
-                bindCameraXUsecases(lensFacing)
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.take_picture -> {
-                // put lambda inside ()
+    private val mOnNavigationItemSelectedListener =
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            image.setImageBitmap(null)
+            result.text = ""
+            when (item.itemId) {
+                R.id.live_camera -> {
+                    // hide fab
+                    // hide image
+                    // show and initialize view_finder
+                    image.visibility = GONE
+                    live_container.visibility = VISIBLE
+                    fab.setOnClickListener(flipLiveCameraListener)
+                    fab.setImageResource(R.drawable.baseline_switch_camera_24)
+                    liveCameraOwner.startCamera()
+                    startCamera(lensFacing)
+                    return@OnNavigationItemSelectedListener true
+                }
+                R.id.take_picture -> {
+                    // put lambda inside ()
 //                button.setOnClickListener ({
 //                    // take picture
 //                    startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), TAKE_PICTURE_WITH_CAMERA)
 //                })
 
-                // can put lambda outside () since it's the last parameter
+                    // can put lambda outside () since it's the last parameter
 //                button.setOnClickListener () {
 //                    // take picture
 //                    startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), TAKE_PICTURE_WITH_CAMERA)
 //                }
 
-                // simpler version: omit (), directly add labmda, note there's a default reserved param 'it'
-                image.visibility = VISIBLE
-                live_container.visibility = GONE
-                fab.setOnClickListener(takePicListener)
-                fab.setImageResource(R.drawable.baseline_camera_24)
-                liveCameraOwner.stopCamera() // will unbind cameraX usesaces, need to rebind
-                return@OnNavigationItemSelectedListener true
+                    // simpler version: omit (), directly add labmda, note there's a default reserved param 'it'
+                    image.visibility = VISIBLE
+                    live_container.visibility = GONE
+                    fab.setOnClickListener(takePicListener)
+                    fab.setImageResource(R.drawable.baseline_camera_24)
+                    liveCameraOwner.stopCamera() // will unbind cameraX usesaces, need to rebind
+                    return@OnNavigationItemSelectedListener true
+                }
+                R.id.gallery -> {
+                    image.visibility = VISIBLE
+                    live_container.visibility = GONE
+                    fab.setOnClickListener(pickPicListener)
+                    fab.setImageResource(R.drawable.baseline_photo_24)
+                    liveCameraOwner.stopCamera()
+                    return@OnNavigationItemSelectedListener true
+                }
             }
-            R.id.gallery -> {
-                image.visibility = VISIBLE
-                live_container.visibility = GONE
-                fab.setOnClickListener(pickPicListener)
-                fab.setImageResource(R.drawable.baseline_photo_24)
-                liveCameraOwner.stopCamera()
-                return@OnNavigationItemSelectedListener true
-            }
+            false
         }
-        false
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         // when == switch
@@ -206,12 +223,17 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
             TAKE_PICTURE_WITH_CAMERA -> {
                 if (resultCode == Activity.RESULT_OK) {
                     lastPicTakenUri?.let { nonNullUri ->
-                        MediaStore.Images.Media.getBitmap(contentResolver!!, nonNullUri).let { bitmap ->
-                            rotateImageIfRequired(this, bitmap, lastPicTakenUri!!).let { rotatedBitmap ->
-                                displayImage(rotatedBitmap)
-                                handleImage(rotatedBitmap)
+                        MediaStore.Images.Media.getBitmap(contentResolver!!, nonNullUri)
+                            .let { bitmap ->
+                                rotateImageIfRequired(
+                                    this,
+                                    bitmap,
+                                    lastPicTakenUri!!
+                                ).let { rotatedBitmap ->
+                                    displayImage(rotatedBitmap)
+                                    handleImage(rotatedBitmap)
+                                }
                             }
-                        }
                     }
 
 //                    val bitmap = data?.extras!!["data"] as Bitmap
@@ -225,7 +247,10 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
             PICK_PICTURE_WITH_GALLERY -> {
                 if (resultCode == Activity.RESULT_OK) {
                     // ?: if data? is null, instead of return null, return Uri.Empty
-                    val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, data?.data ?: Uri.EMPTY)
+                    val bitmap = MediaStore.Images.Media.getBitmap(
+                        contentResolver,
+                        data?.data ?: Uri.EMPTY
+                    )
                     displayImage(bitmap)
                     handleImage(bitmap)
                 }
@@ -245,7 +270,6 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
     fun postResult(resultText: String?) {
         // ?: if result is null, instead of returning null, return ""
         result.text = resultText ?: ""
-
     }
 
     fun postLiveResult(resultText: String?) {
@@ -259,6 +283,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
         view_finder.display?.let {
             handleLiveImage(image, it.rotation)
         }
+        Log.d("BGLM", "result updated!")
     }
 
     @Throws(IOException::class)
