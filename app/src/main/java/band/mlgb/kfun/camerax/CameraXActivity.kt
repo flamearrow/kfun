@@ -68,6 +68,7 @@ class CameraXActivity : KFunBaseActivity() {
             )
         }
 
+        // this is unrelated to CameraX
         lifecycle.addObserver(MLGBALifeCycleObserver())
     }
 

@@ -22,6 +22,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.Lifecycle
 import band.mlgb.kfun.camerax.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_pick_image.*
@@ -50,21 +51,41 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
 
     private var lastPicTakenUri: Uri? = null
     private var liveCameraOwner: LiveCameraOwner = LiveCameraOwner()
+    private var cameraProvider: ProcessCameraProvider? = null
+
+    // this value gets flipped when button is clicked, need to rebind liveCameraUsecases to
+    // reflect the change
     private var lensFacing = CameraSelector.DEFAULT_BACK_CAMERA
         set(value) {
-            startCamera(value)
             field = value
+            bindLiveCameraUsecases()
         }
     private lateinit var previewUseCase: Preview
     private lateinit var imageAnalysisUsecase: ImageAnalysis
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pick_image)
         fab.setOnClickListener(flipLiveCameraListener)
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        btm_navigation_view.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         result.movementMethod = ScrollingMovementMethod()
         initializeCamera()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Note when initialized, onResume is also called, but by then cameraProviderFuture is not
+        // executed yet, so this won't trigger. It only triggers when app is minimized and
+        // recovered.
+        if (liveCameraOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            bindLiveCameraUsecases()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        liveCameraOwner.shutDown()
     }
 
     private fun initializeCamera() {
@@ -75,7 +96,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
 
         // Request camera permissions
         if (allPermissionsGranted()) {
-            startCamera(lensFacing)
+            startCamera()
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
@@ -84,25 +105,37 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
 
     }
 
-    private fun startCamera(cameraSelector: CameraSelector) {
+    // Initialize CameraProvider and bind usecases, later when flipping/turning on/off camera,
+    // no need to initialize CameraProvider
+    private fun startCamera() {
+//        // if not in CREATED(just initialized), should be in STARTED(paused, and swiped back)
+//        if (liveCameraOwner.lifecycle.currentState == Lifecycle.State.CREATED) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         // run when this future is done on main executor
         cameraProviderFuture.addListener({
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-            try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
-                    this,
-                    cameraSelector,
-                    previewUseCase,
-                    imageAnalysisUsecase
-                )
-            } catch (exec: Exception) {
-                Log.e(CameraXActivity.TAG, "use case binding failed", exec)
-            }
+            cameraProvider = cameraProviderFuture.get()
+            bindLiveCameraUsecases()
+            liveCameraOwner.startCamera()
         }, ContextCompat.getMainExecutor(this))
-
     }
+
+    private fun bindLiveCameraUsecases() {
+        val cameraProvider =
+            cameraProvider ?: throw IllegalStateException("CameraProvider not initialized.")
+
+        cameraProvider.unbindAll()
+        try {
+            cameraProvider.bindToLifecycle(
+                liveCameraOwner,
+                lensFacing,
+                previewUseCase,
+                imageAnalysisUsecase
+            )
+        } catch (exec: Exception) {
+            Log.e(CameraXActivity.TAG, "Use case binding failed", exec)
+        }
+    }
+
 
     /**
      * Check if all permission specified in the manifest have been granted
@@ -120,6 +153,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
     }
 
     private val flipLiveCameraListener = View.OnClickListener {
+        // will trigger rebind
         lensFacing =
             if (lensFacing == CameraSelector.DEFAULT_BACK_CAMERA) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
     }
@@ -171,6 +205,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             image.setImageBitmap(null)
             result.text = ""
+            toggleLoading(false)
             when (item.itemId) {
                 R.id.live_camera -> {
                     // hide fab
@@ -181,7 +216,6 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
                     fab.setOnClickListener(flipLiveCameraListener)
                     fab.setImageResource(R.drawable.baseline_switch_camera_24)
                     liveCameraOwner.startCamera()
-                    startCamera(lensFacing)
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.take_picture -> {
@@ -202,7 +236,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
                     live_container.visibility = GONE
                     fab.setOnClickListener(takePicListener)
                     fab.setImageResource(R.drawable.baseline_camera_24)
-                    liveCameraOwner.stopCamera() // will unbind cameraX usesaces, need to rebind
+                    liveCameraOwner.pauseCamera()
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.gallery -> {
@@ -210,7 +244,7 @@ abstract class PickImageActivity : KFunBaseActivity(), LiveImageAnalyzer.LiveRes
                     live_container.visibility = GONE
                     fab.setOnClickListener(pickPicListener)
                     fab.setImageResource(R.drawable.baseline_photo_24)
-                    liveCameraOwner.stopCamera()
+                    liveCameraOwner.pauseCamera()
                     return@OnNavigationItemSelectedListener true
                 }
             }

@@ -24,7 +24,7 @@
         android:id="@+id/live_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/navigation"
+        app:layout_constraintBottom_toTopOf="@+id/btm_navigation_view"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -57,7 +57,7 @@
         android:id="@+id/result_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/navigation"
+        app:layout_constraintBottom_toTopOf="@+id/btm_navigation_view"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/image"
@@ -81,7 +81,7 @@
     </FrameLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/navigation"
+        android:id="@+id/btm_navigation_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="0dp"
@@ -98,7 +98,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="25dp"
         android:src="@drawable/baseline_switch_camera_24"
-        app:layout_constraintBottom_toTopOf="@+id/navigation"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/btm_navigation_view"
+        app:layout_constraintRight_toRightOf="parent"
+        android:contentDescription="@null" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

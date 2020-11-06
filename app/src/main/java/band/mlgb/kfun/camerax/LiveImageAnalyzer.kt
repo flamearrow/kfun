@@ -21,7 +21,6 @@ class LiveImageAnalyzer(private val resultUpdater: LiveResultUpdater) : ImageAna
 
     @ExperimentalGetImage
     override fun analyze(image: ImageProxy) {
-        Log.d("BGLM", "LiveImageAnalyzer.analyze")
         val currentTimestamp = System.currentTimeMillis()
         if (currentTimestamp - lastAnalyzedTimestamp >=
             TimeUnit.SECONDS.toMillis(1)

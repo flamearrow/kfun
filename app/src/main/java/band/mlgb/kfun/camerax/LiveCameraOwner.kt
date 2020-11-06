@@ -15,7 +15,7 @@ class LiveCameraOwner : LifecycleOwner {
     private val lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
 
     init {
-        lifecycleRegistry.currentState = Lifecycle.State.STARTED
+        lifecycleRegistry.currentState = Lifecycle.State.CREATED
         lifecycleRegistry.addObserver(MLGBALifeCycleObserver())
     }
 
@@ -24,13 +24,15 @@ class LiveCameraOwner : LifecycleOwner {
     }
 
     fun startCamera() {
-        lifecycleRegistry.currentState = Lifecycle.State.STARTED
-
+        lifecycleRegistry.currentState = Lifecycle.State.RESUMED
     }
 
-    fun stopCamera() {
-        lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
+    fun pauseCamera() {
+        lifecycleRegistry.currentState = Lifecycle.State.STARTED
+    }
 
+    fun shutDown() {
+        lifecycleRegistry.currentState = Lifecycle.State.RESUMED
     }
 
 }
