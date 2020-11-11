@@ -9,6 +9,7 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import javax.inject.Inject
 
 
+@Deprecated("Firebase API outdated")
 class LandmarkDetectorActivity : PickImageActivity() {
     @Inject
     lateinit var landmarkDetector: FirebaseVisionCloudLandmarkDetector
@@ -62,7 +63,10 @@ class LandmarkDetectorActivity : PickImageActivity() {
     }
 
     override fun handleImage(bitmap: Bitmap) {
-        processImage(FirebaseVisionImage.fromBitmap(bitmap), ::postResult) { toastShort("no land marks found") }
+        processImage(
+            FirebaseVisionImage.fromBitmap(bitmap),
+            ::postResult
+        ) { toastShort("no land marks found") }
     }
 
     override fun handleLiveImage(image: Image, rotation: Int) {

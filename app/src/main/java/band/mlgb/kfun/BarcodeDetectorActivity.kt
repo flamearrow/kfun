@@ -11,6 +11,7 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 
+@Deprecated("Firebase API outdated")
 class BarcodeDetectorActivity : PickImageActivity() {
     private lateinit var barcodeDetector: FirebaseVisionBarcodeDetector
 

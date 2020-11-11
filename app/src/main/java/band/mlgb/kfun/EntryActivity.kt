@@ -19,21 +19,21 @@ class EntryActivity : KFunBaseActivity() {
         startActivity(Intent(applicationContext, ImageLabelingActivity::class.java))
     }
 
-    fun textDetect(view: View) {
-        startActivity(Intent(applicationContext, TextDetectionActivity::class.java))
-    }
+//    fun textDetect(view: View) {
+//        startActivity(Intent(applicationContext, TextDetectionActivity::class.java))
+//    }
 
     fun faceDetect(view: View) {
         startActivity(Intent(applicationContext, FaceDetectActivity::class.java))
     }
 
-    fun barcodeDetect(view: View) {
-        startActivity(Intent(applicationContext, BarcodeDetectorActivity::class.java))
-    }
+//    fun barcodeDetect(view: View) {
+//        startActivity(Intent(applicationContext, BarcodeDetectorActivity::class.java))
+//    }
 
-    fun landmarkDetect(view: View) {
-        startActivity(Intent(applicationContext, LandmarkDetectorActivity::class.java))
-    }
+//    fun landmarkDetect(view: View) {
+//        startActivity(Intent(applicationContext, LandmarkDetectorActivity::class.java))
+//    }
 
     fun langDetect(view: View) {
         startActivity(Intent(applicationContext, LangIdActivity::class.java))
@@ -48,8 +48,6 @@ class EntryActivity : KFunBaseActivity() {
     }
 
     fun cameraX(view: View) {
-//        startActivity(Intent(applicationContext, CameraXActivity::class.java))
-//        startActivity(Intent(applicationContext, CameraXActivity::class.java))
         startActivityForResult(Intent(applicationContext, CameraXActivity::class.java), CAMERA_X)
     }
 

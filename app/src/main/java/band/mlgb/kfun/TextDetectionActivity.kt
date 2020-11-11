@@ -8,7 +8,7 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer
 import javax.inject.Inject
 
-// OCR
+@Deprecated("Firebase API outdated")
 class TextDetectionActivity : PickImageActivity() {
     @Inject
     lateinit var firebaseVisionTextRecognizer: FirebaseVisionTextRecognizer
